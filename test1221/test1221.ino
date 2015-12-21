@@ -1,42 +1,60 @@
 #include <EnableInterrupt.h>
-// #include <PinChangeInt.h>
 
-int count=0;
-int pf=0;
-int tp=0;
+int count[5]={}; // 5 tubes
+int tempc[5]={};
+int dt;
+unsigned long pre_t=0;
 
-void setup() {
+void setup() 
+{
     Serial.begin(9600);
+    
     enableInterrupt(A0, &counter, RISING);
-    // PCintPort::attachInterrupt(A0, &counter, RISING);
+    enableInterrupt(A1, &counter, RISING);
+    enableInterrupt(A2, &counter, RISING);
+    enableInterrupt(A3, &counter, RISING);
+    enableInterrupt(A4, &counter, RISING);
 }
 
-void loop() {
-    //disableInterrupt(A0);
-    // PCintPort::detachInterrupt(A0);
-    if (count/2 != tp) {
-      Serial.print(count/2);
-      Serial.print(' ');
-      enableInterrupt(A0, &counter, RISING);
-      Serial.println(micros());
-      // PCintPort::attachInterrupt(A0, &counter, RISING);
-      delay(100);
-
-      tp = count/2;
-    }
+void loop() 
+{
     /*
-    int pin = digitalRead(A0);
-    if (pin==HIGH){
-      pf++;
-      Serial.println(pf);
-      delay(500);
+    if (count[0]/2!=tempc[0] ||
+        count[1]/2!=tempc[1] ||
+        count[2]/2!=tempc[2] ||
+        count[3]/2!=tempc[3] ||
+        count[4]/2!=tempc[4] ) 
+    {
+        Serial.print(dt);
+        Serial.print(' ');
+        Serial.print(count[dt]/2);
+        Serial.print(' ');
+        Serial.println(micros()); // time stamp for later analysis, us
+
+        tempc[dt]=count[dt]/2;
     }
     */
+    enableInterrupt(A0, &counter, RISING);
+    enableInterrupt(A1, &counter, RISING);
+    enableInterrupt(A2, &counter, RISING);
+    enableInterrupt(A3, &counter, RISING);
+    enableInterrupt(A4, &counter, RISING);
+
+    // delay(50); // take data once per 0.05 s
 }
 
 void counter() {
-    count++;
+    unsigned long now_t = micros();
+    if (now_t - pre_t > 500)
+    {
+        dt = PINC-1;
+        count[dt]++;
+        pre_t = now_t;
+    }
+    Serial.print(dt);
+    Serial.print(' ');
+    Serial.print(count[dt]/2);
+    Serial.print(' ');
+    Serial.println(micros()); // time stamp, in us
 }
-
-//////////////////////////
 
