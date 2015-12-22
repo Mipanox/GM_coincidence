@@ -1,14 +1,14 @@
-#include <EnableInterrupt.h>
+#include <EnableInterrupt.h> // please load this
 
 int count[5]={}; // 5 tubes
 int tempc[5]={};
-int dt;
+int dt; // tube number = PIC - 1
 unsigned long pre_t=0;
 
 void setup() 
 {
     Serial.begin(9600);
-    
+    // interrupt
     enableInterrupt(A0, &counter, RISING);
     enableInterrupt(A1, &counter, RISING);
     enableInterrupt(A2, &counter, RISING);
@@ -18,22 +18,6 @@ void setup()
 
 void loop() 
 {
-    /*
-    if (count[0]/2!=tempc[0] ||
-        count[1]/2!=tempc[1] ||
-        count[2]/2!=tempc[2] ||
-        count[3]/2!=tempc[3] ||
-        count[4]/2!=tempc[4] ) 
-    {
-        Serial.print(dt);
-        Serial.print(' ');
-        Serial.print(count[dt]/2);
-        Serial.print(' ');
-        Serial.println(micros()); // time stamp for later analysis, us
-
-        tempc[dt]=count[dt]/2;
-    }
-    */
     enableInterrupt(A0, &counter, RISING);
     enableInterrupt(A1, &counter, RISING);
     enableInterrupt(A2, &counter, RISING);
@@ -45,16 +29,18 @@ void loop()
 
 void counter() {
     unsigned long now_t = micros();
-    if (now_t - pre_t > 500)
+    if (now_t - pre_t > 500) // > 500 us ~ pulse width
     {
-        dt = PINC-1;
+        dt = PINC-1; // record tube number
         count[dt]++;
         pre_t = now_t;
     }
     Serial.print(dt);
     Serial.print(' ');
-    Serial.print(count[dt]/2);
+    Serial.print(count[dt]/2); // count is always somehow doubled, so divide by 2
     Serial.print(' ');
     Serial.println(micros()); // time stamp, in us
+
+    // output format: #tube count(cumulative) time(start from 0, in us)
 }
 
