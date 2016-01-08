@@ -32,7 +32,7 @@ void single_tube(int cnt[])
 
 void coincidence(int cn[])
 {
-  for (int i=0; i<128; i++)
+  for (int i=0; i<64; i++)
   {
     Serial.print(cn[i]);
     Serial.print(" ");
@@ -50,7 +50,7 @@ void loop()
 {
   int count[6]     = {0};
   int lastcount[6] = {0};
-  int coin[128]     = {0}; // 2^(6+1)
+  int coin[64]     = {0}; // 2^6
   
   while (millis() - lastoutput < 60000) // output per min
   {
