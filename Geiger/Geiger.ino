@@ -19,11 +19,6 @@ void setup()
   }
 }
 
-int32_t lastoutput = 0;
-int32_t lastinput[6] = {0};
-byte lastPINC = 0;
-
-
 /* print count */
 void single_tube(int cnt[])
 {
@@ -37,7 +32,7 @@ void single_tube(int cnt[])
 
 void coincidence(int cn[])
 {
-  for (int i=0; i<64; i++)
+  for (int i=0; i<128; i++)
   {
     Serial.print(cn[i]);
     Serial.print(" ");
@@ -45,45 +40,66 @@ void coincidence(int cn[])
   Serial.println("");
 }
 
+/////////////////////////////////////////
+int32_t lastoutput = 0;
+int32_t lastcoin   = 0;
+int32_t lastinput[6] = {0};
+byte lastPINC = 0;
+
 void loop() 
 {
-  int count[6] = {0};
-  int coin[64] = {0}; // 2^6
+  int count[6]     = {0};
+  int lastcount[6] = {0};
+  int coin[128]     = {0}; // 2^(6+1)
   
   while (millis() - lastoutput < 60000) // output per min
   {
-    if (PINC !=0B111111)
+    byte pinchange = 0;
+    int  pinchc    = 0;
+
+    for (int i=0; i<6; i++) lastcount[i] = count[i];
+    while (millis() - lastcoin < 500) // coincidence interval = 500 us
     {
-      byte pinchange = 0;
-      int  pinchc    = 0;  
-      
-      for (int i=0; i<6; i++)
-      {
-        if (bitRead(PINC,i)!=1) // get lowering edges
+      //// record hit in each tube ////
+      if (PINC !=0B111111)
+      {  
+        for (int i=0; i<6; i++)
         {
-          if (millis() - lastinput[i] > 1) // debouncing for 1s
+          if (bitRead(PINC,i)!=1) // get lowering edges
           {
-            if (bitRead(lastPINC,i) != 0)
+            if (millis() - lastinput[i] > 1) // debouncing for 1 ms
             {
-              count[i] += 1;
-              lastinput[i] = millis();
-              
-              bitWrite(pinchange,i,1);
-              pinchc += 1;
+              if (bitRead(lastPINC,i) != 0)
+              {
+                count[i] += 1;
+                lastinput[i] = millis();
+              }
             }
           }
         }
       }
-      if (pinchc >= 2) // if coincidence happens
+    lastPINC = PINC;
+    }
+    lastcoin = millis();
+
+    //// check which tubes have been hit
+    for (int i=0; i<6; i++)
+    {
+      if (count[i] != lastcount[i])
       {
-        int whichpins = int(pinchange);
-        coin[whichpins] += 1;
+        bitWrite(pinchange,i,1);
+        pinchc += 1;
       }
     }
-    lastPINC = PINC;
+    //// count coincidence 
+    if (pinchc >= 2) // if coincidence happens
+    {
+      int whichpins = int(pinchange);
+      coin[whichpins] += 1;
+    }
   }
   lastoutput = millis();
-
+  
   /* select to print single tube countings or multi-tube coincidence */
   // single_tube(count);
   coincidence(coin);
