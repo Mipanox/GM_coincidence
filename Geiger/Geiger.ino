@@ -101,7 +101,7 @@ void loop()
   lastoutput = millis();
   
   /* select to print single tube countings or multi-tube coincidence */
-  // single_tube(count);
-  coincidence(coin);
+  single_tube(count);
+  // coincidence(coin);
 }
   
