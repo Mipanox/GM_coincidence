@@ -1,12 +1,12 @@
 #include <stdio.h>
-static FILE uartout = {0} ;
+static FILE uartout = {0};
 
 /** static int uart_putchar (char c, FILE *stream)
  -- above not working in OSX, so removed static in below: **/
 int uart_putchar (char c, FILE *stream)
 {
-  Serial.write(c) ;
-  return 0 ;
+  Serial.write(c);
+  return 0;
 }
 
 int input[6] = {A0,A1,A2,A3,A4,A5};
@@ -52,16 +52,16 @@ void loop()
   int lastcount[6] = {0};
   int coin[64]     = {0}; // 2^6
   
-  while (millis() - lastoutput < 60000) // output per min
+  while (millis() - lastoutput < 1000) // output per min
   {
     byte pinchange = 0;
     int  pinchc    = 0;
 
     for (int i=0; i<6; i++) lastcount[i] = count[i];
-    while (millis() - lastcoin < 500) // coincidence interval = 500 us
+    while (micros() - lastcoin < 500) // coincidence interval = 500 us
     {
       //// record hit in each tube ////
-      if (PINC !=0B111111)
+      if (PINC != 0B111111)
       {  
         for (int i=0; i<6; i++)
         {
@@ -80,7 +80,7 @@ void loop()
       }
     lastPINC = PINC;
     }
-    lastcoin = millis();
+    lastcoin = micros();
 
     //// check which tubes have been hit
     for (int i=0; i<6; i++)

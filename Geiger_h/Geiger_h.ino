@@ -40,15 +40,16 @@ void loop()
   
   while (millis() - lastoutput < 1000)
   {
-    byte data = PINC;
-    if(data != 0B111111)
+    byte data = !PINC;
+    if (PINC != 0B111111)
     {
       byte alert = 0;
       uint32_t startCatch = micros();
       
       while (micros() - startCatch < 500)
       { // which pins have been hit cumulatively in this 500 us
-        data |= PINC;
+        byte tp = !PINC;
+        data |= tp;
       }
       for (int i=0; i<5; i++)
       {
