@@ -40,20 +40,20 @@ void loop()
   
   while (millis() - lastoutput < 1000)
   {
-    byte data = !PINC;
-    if (PINC != 0B111111)
+    byte data = ~PINC & 0B111111;
+    if (data != 0)
     {
       byte alert = 0;
       uint32_t startCatch = micros();
       
-      while (micros() - startCatch < 500)
-      { // which pins have been hit cumulatively in this 500 us
-        byte tp = !PINC;
-        data |= tp;
+      while (micros() - startCatch < 50)
+      { // which pins have been hit cumulatively in this 50 us
+        data |= ~PINC & 0B111111;
       }
       for (int i=0; i<5; i++)
       {
         alert += bitRead(data,i);
+        // Serial.print(alert); Serial.print(" ");
       }
       if (alert >= 2)
       {
@@ -73,9 +73,10 @@ void loop()
   }
   
   #ifdef debug
-  for(int i=0; i<10; i++)
+  for(int i=0; i<32; i++)
   {
-    Serial.print(dataoutput[i]);
+    // Serial.print(dataoutput[i]);
+    Serial.print(count[i]);
     Serial.print(" ");
   }
   Serial.println("");
